@@ -1,11 +1,24 @@
+using Dapr.Client;
+
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Services.AddDaprClient();
 // Add services to the container.
-
+string corsMAM = "_corsMAM";
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddControllers().AddNewtonsoftJson();
+
+builder.Services.AddCors(Options =>
+{
+    Options.AddPolicy(name: corsMAM,
+        builder =>
+        {
+            builder.WithOrigins("http://localhost", "http://localhost:3000", "*").AllowAnyHeader().AllowCredentials().WithMethods("PUT", "DELETE", "GET", "POST");
+        });
+});
+IConfiguration configuration = builder.Configuration;
 
 var app = builder.Build();
 
@@ -16,6 +29,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors(corsMAM);
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
